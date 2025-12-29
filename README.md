@@ -61,14 +61,14 @@ wrangler login
 1. **Clone or download this repository**
 
 ```bash
-git clone https://github.com/YourUsername/gdindex.git
+git clone https://github.com/ToonTamilIndia/gdindex.git
 cd gdindex
 ```
 
-2. **Create wrangler.toml**
+2. **Check wrangler.toml**
 
 ```bash
-cp wrangler.example.toml wrangler.toml
+cat wrangler.toml
 ```
 
 3. **Configure wrangler.toml**
