@@ -36,14 +36,9 @@ A feature-rich Google Drive & Mega.nz index running on Cloudflare Workers, featu
 
 ## 🚀 Deployment
 
-### Option 1: Cloudflare Dashboard (Easy)
 
-1. Go to [Cloudflare Workers Dashboard](https://dash.cloudflare.com/)
-2. Create a new Worker
-3. Copy the content of all `.js` files
-4. Click **Save and Deploy**
 
-### Option 2: Wrangler CLI (Recommended)
+### Wrangler CLI (Recommended)
 
 #### Prerequisites
 
@@ -100,7 +95,7 @@ wrangler dev
 wrangler deploy
 ```
 
-### Option 3: GitHub Actions (CI/CD)
+### GitHub Actions (CI/CD)
 
 Create `.github/workflows/deploy.yml`:
 
