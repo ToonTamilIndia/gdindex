@@ -367,8 +367,7 @@ MIT License - feel free to use and modify.
 
 ## 🙏 Credits
 
-- Original [GOIndex](https://github.com/donwa/goindex) by donwa
-- Redesigned by [Parveen Bhadoo](https://github.com/AnshumanHeroapple)
+- Original [Parveen Bhadoo]()
 - UI powered by [Bootstrap](https://getbootstrap.com/) & [Bootswatch](https://bootswatch.com/)
 - Video player by [Plyr](https://plyr.io/)
 
