@@ -41,8 +41,7 @@ A feature-rich Google Drive & Mega.nz index running on Cloudflare Workers, featu
 1. Go to [Cloudflare Workers Dashboard](https://dash.cloudflare.com/)
 2. Create a new Worker
 3. Copy the content of all `.js` files
-4. For a single-file deployment, use the bundled version or copy `index.backup.js`
-5. Click **Save and Deploy**
+4. Click **Save and Deploy**
 
 ### Option 2: Wrangler CLI (Recommended)
 
