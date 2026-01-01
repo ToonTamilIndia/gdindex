@@ -143,13 +143,13 @@ function rewrite(str) {
     return aj;
 }
 
-// String trim extension
-String.prototype.trim = function(char) {
+// String trim utility that trims a specific character or whitespace
+function trimChar(str, char) {
     if (char) {
-        return this.replace(new RegExp('^\\' + char + '+|\\' + char + '+$', 'g'), '');
+        return str.replace(new RegExp('^\\' + char + '+|\\' + char + '+$', 'g'), '');
     }
-    return this.replace(/^\s+|\s+$/g, '');
-};
+    return str.trim();
+}
 
 // Cookie parser helper
 function getCookie(cookie, name) {
@@ -165,11 +165,12 @@ function getCookie(cookie, name) {
 
 // File size formatter
 function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes || bytes <= 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const sizeIndex = Math.min(i, sizes.length - 1);
+    return parseFloat((bytes / Math.pow(k, sizeIndex)).toFixed(2)) + ' ' + sizes[sizeIndex];
 }
 
 // Date formatter
@@ -186,5 +187,6 @@ export {
     rewrite,
     getCookie,
     formatFileSize,
-    formatDate
+    formatDate,
+    trimChar
 };

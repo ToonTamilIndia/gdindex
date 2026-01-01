@@ -190,7 +190,8 @@ async function handleRequest(request, event) {
         } else {
             return redirectToIndexPage();
         }
-        for (const r = gd.basicAuthResponse(request); r;) return r;
+        const r = gd.basicAuthResponse(request);
+        if (r) return r;
         const command = match.groups.command;
         
         if (command === 'search') {
@@ -391,11 +392,10 @@ async function apiRequest(request, gd) {
         }
 
         let list_result = await deferred_list_result;
-        return new Response(rewrite(gdiencode(JSON.stringify(list_result), option)));
+        return new Response(rewrite(gdiencode(JSON.stringify(list_result))), option);
     } else {
         let file = await gd.file(path);
-        let range = request.headers.get('Range');
-        return new Response(rewrite(gdiencode(JSON.stringify(file))));
+        return new Response(rewrite(gdiencode(JSON.stringify(file))), option);
     }
 }
 
@@ -413,7 +413,7 @@ async function handleSearch(request, gd) {
         form.get('page_token'), 
         Number(form.get('page_index'))
     );
-    return new Response(rewrite(gdiencode(JSON.stringify(search_result), option)));
+    return new Response(rewrite(gdiencode(JSON.stringify(search_result))), option);
 }
 
 // ID to Path handler

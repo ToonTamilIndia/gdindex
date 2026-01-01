@@ -654,7 +654,7 @@ async function handleDashboard(request, url) {
                 status: 302,
                 headers: {
                     'Location': '/dashboard',
-                    'Set-Cookie': 'dashboard_auth=true; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400'
+                    'Set-Cookie': 'dashboard_auth=true; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400'
                 }
             });
         }
