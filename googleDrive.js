@@ -1,6 +1,6 @@
 // Google Drive Handler Class
 import { authConfig, uiConfig } from './config.js';
-import { DriveFixedTerms, JSONWebToken, SearchFunction } from './utils.js';
+import { DriveFixedTerms, JSONWebToken, SearchFunction, trimChar } from './utils.js';
 import { not_found, unauthorized } from './templates.js';
 
 class GoogleDrive {
@@ -384,7 +384,7 @@ class GoogleDrive {
         let c_path = '/';
         let c_id = this.paths[c_path];
 
-        let arr = path.trim('/').split('/');
+        let arr = trimChar(path, '/').split('/');
         for (let name of arr) {
             c_path += name + '/';
 

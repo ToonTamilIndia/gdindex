@@ -313,6 +313,50 @@ class MegaCrypto {
         
         return new Uint8Array(decrypted);
     }
+
+    // Prepare key for legacy Mega authentication
+    static async prepareKey(password) {
+        const passwordBytes = new TextEncoder().encode(password);
+        let pkey = [0x93C467E3, 0x7DB0C7A4, 0xD1BE3F81, 0x0152CB56];
+        
+        for (let r = 0; r < 65536; r++) {
+            for (let j = 0; j < passwordBytes.length; j += 16) {
+                const key = [0, 0, 0, 0];
+                for (let i = 0; i < 16; i++) {
+                    if (j + i < passwordBytes.length) {
+                        key[Math.floor(i / 4)] = ((key[Math.floor(i / 4)] << 8) | passwordBytes[j + i]) >>> 0;
+                    }
+                }
+                const keyBytes = this.a32ToStr(key);
+                const pkeyBytes = this.a32ToStr(pkey);
+                const encrypted = new AES_ECB(keyBytes).encrypt(pkeyBytes);
+                pkey = this.strToA32(encrypted);
+            }
+        }
+        return pkey;
+    }
+
+    // Generate string hash for legacy Mega authentication
+    static async stringHash(str, aesKey) {
+        const strBytes = new TextEncoder().encode(str);
+        let s32 = this.strToA32(strBytes);
+        let h32 = [0, 0, 0, 0];
+        
+        for (let i = 0; i < s32.length; i++) {
+            h32[i % 4] = (h32[i % 4] ^ s32[i]) >>> 0;
+        }
+        
+        const keyBytes = this.a32ToStr(aesKey);
+        const aes = new AES_ECB(keyBytes);
+        
+        for (let i = 0; i < 16384; i++) {
+            const h32Bytes = this.a32ToStr(h32);
+            const encrypted = aes.encrypt(h32Bytes);
+            h32 = this.strToA32(encrypted);
+        }
+        
+        return this.a32ToBase64([h32[0], h32[2]]);
+    }
 }
 
 // ===================== MEGA DRIVE CLASS =====================
