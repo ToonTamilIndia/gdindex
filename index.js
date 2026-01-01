@@ -5,7 +5,7 @@
     ╚██████╔╝██████╔╝██║██╗╚█████╔╝██████╔╝██╗╚█████╔╝██║░░██║╚██████╔╝
     ░╚═════╝░╚═════╝░╚═╝╚═╝░╚════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚═╝░╚═════╝░
                              v 2.3.0 - Modular
-    Redesigned by Parveen Bhadoo with Mega.nz Support & Dashboard
+                        Mega.nz Support & Dashboard
     
     Features:
     - Modular file structure
