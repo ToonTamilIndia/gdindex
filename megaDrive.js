@@ -313,50 +313,6 @@ class MegaCrypto {
         
         return new Uint8Array(decrypted);
     }
-
-    // Prepare key for legacy Mega authentication
-    static async prepareKey(password) {
-        const passwordBytes = new TextEncoder().encode(password);
-        let pkey = [0x93C467E3, 0x7DB0C7A4, 0xD1BE3F81, 0x0152CB56];
-        
-        for (let r = 0; r < 65536; r++) {
-            for (let j = 0; j < passwordBytes.length; j += 16) {
-                const key = [0, 0, 0, 0];
-                for (let i = 0; i < 16; i++) {
-                    if (j + i < passwordBytes.length) {
-                        key[Math.floor(i / 4)] = ((key[Math.floor(i / 4)] << 8) | passwordBytes[j + i]) >>> 0;
-                    }
-                }
-                const keyBytes = this.a32ToStr(key);
-                const pkeyBytes = this.a32ToStr(pkey);
-                const encrypted = new AES_ECB(keyBytes).encrypt(pkeyBytes);
-                pkey = this.strToA32(encrypted);
-            }
-        }
-        return pkey;
-    }
-
-    // Generate string hash for legacy Mega authentication
-    static async stringHash(str, aesKey) {
-        const strBytes = new TextEncoder().encode(str);
-        let s32 = this.strToA32(strBytes);
-        let h32 = [0, 0, 0, 0];
-        
-        for (let i = 0; i < s32.length; i++) {
-            h32[i % 4] = (h32[i % 4] ^ s32[i]) >>> 0;
-        }
-        
-        const keyBytes = this.a32ToStr(aesKey);
-        const aes = new AES_ECB(keyBytes);
-        
-        for (let i = 0; i < 16384; i++) {
-            const h32Bytes = this.a32ToStr(h32);
-            const encrypted = aes.encrypt(h32Bytes);
-            h32 = this.strToA32(encrypted);
-        }
-        
-        return this.a32ToBase64([h32[0], h32[2]]);
-    }
 }
 
 // ===================== MEGA DRIVE CLASS =====================
@@ -748,6 +704,14 @@ class MegaDrive {
         return new Response(not_found, { status: 404, headers: { 'content-type': 'text/html' } });
     }
     
+    // Handle .ts files as .mkv for better player compatibility
+    let fileName = node.name;
+    let mimeType = node.mimeType;
+    if (fileName.toLowerCase().endsWith('.ts') || fileName.toLowerCase().endsWith('.m2ts') || fileName.toLowerCase().endsWith('.mts')) {
+        fileName = fileName.replace(/\.(ts|m2ts|mts)$/i, '.mkv');
+        mimeType = 'video/x-matroska';
+    }
+    
     try {
         let params = '';
         let reqBody;
@@ -808,8 +772,8 @@ class MegaDrive {
             return new Response(fileResp.body, {
                 status: 206,
                 headers: {
-                    'Content-Type': node.mimeType,
-                    'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(node.name)}`,
+                    'Content-Type': mimeType,
+                    'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(fileName)}`,
                     'Content-Length': String(contentLength),
                     'Content-Range': `bytes ${startByte}-${endByte}/${fileSize}`,
                     'Accept-Ranges': 'bytes',
@@ -962,13 +926,13 @@ class MegaDrive {
         
         const decryptedStream = fileResp.body.pipeThrough(transformStream);
         
-        const isMedia = node.mimeType.startsWith('video/') || node.mimeType.startsWith('audio/');
+        const isMedia = mimeType.startsWith('video/') || mimeType.startsWith('audio/');
         const disposition = (inline || isMedia) ? 'inline' : 'attachment';
         
         // ALWAYS respond with 206 and Content-Range to work around Mega limitations
         const respHeaders = {
-            'Content-Type': node.mimeType,
-            'Content-Disposition': `${disposition}; filename*=UTF-8''${encodeURIComponent(node.name)}`,
+            'Content-Type': mimeType,
+            'Content-Disposition': `${disposition}; filename*=UTF-8''${encodeURIComponent(fileName)}`,
             'Accept-Ranges': 'bytes',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
