@@ -494,6 +494,72 @@ class GoogleDrive {
         return response;
     }
 
+    async createFolder(parentPath = '/', folderName = '') {
+        const cleanName = String(folderName || '').trim().replace(/\//g, '');
+        if (!cleanName) throw new Error('Folder name is required.');
+
+        const parentId = await this.findPathId(parentPath);
+        if (!parentId) throw new Error('Target folder path was not found.');
+
+        const metadata = {
+            name: cleanName,
+            mimeType: 'application/vnd.google-apps.folder',
+            parents: [parentId]
+        };
+        const requestOption = await this.requestOption({ 'Content-Type': 'application/json' }, 'POST');
+        requestOption.body = JSON.stringify(metadata);
+
+        const response = await fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true&fields=id,name,mimeType,size,modifiedTime', requestOption);
+        if (!response.ok) throw new Error('Google Drive folder create failed: ' + await response.text());
+
+        const result = await response.json();
+        const folderPath = `${parentPath.replace(/\/$/, '')}/${cleanName}/`.replace(/^\/\//, '/');
+        this.paths[folderPath] = result.id;
+        return { ...result, path: folderPath };
+    }
+
+    async uploadFile(file, uploadPath = '/') {
+        if (!file || typeof file.arrayBuffer !== 'function') {
+            throw new Error('A file is required.');
+        }
+
+        const parentId = await this.findPathId(uploadPath);
+        if (!parentId) throw new Error('Target folder path was not found.');
+
+        const metadata = {
+            name: file.name || 'upload.bin',
+            parents: [parentId]
+        };
+        const boundary = 'gdindex-' + crypto.randomUUID();
+        const encoder = new TextEncoder();
+        const fileBytes = new Uint8Array(await file.arrayBuffer());
+        const metaPart = encoder.encode(
+            `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`
+        );
+        const filePartHeader = encoder.encode(
+            `--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`
+        );
+        const endPart = encoder.encode(`\r\n--${boundary}--`);
+        const body = new Uint8Array(metaPart.length + filePartHeader.length + fileBytes.length + endPart.length);
+        body.set(metaPart, 0);
+        body.set(filePartHeader, metaPart.length);
+        body.set(fileBytes, metaPart.length + filePartHeader.length);
+        body.set(endPart, metaPart.length + filePartHeader.length + fileBytes.length);
+
+        const requestOption = await this.requestOption({
+            'Content-Type': `multipart/related; boundary=${boundary}`
+        }, 'POST');
+        requestOption.body = body;
+
+        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,mimeType,size,modifiedTime', requestOption);
+        if (!response.ok) throw new Error('Google Drive upload failed: ' + await response.text());
+
+        const result = await response.json();
+        const path = `${uploadPath.replace(/\/$/, '')}/${result.name}`.replace(/^\/\//, '/');
+        this.files[path] = result;
+        return { ...result, path };
+    }
+
     async requestOption(headers = {}, method = 'GET') {
         const accessToken = await this.accessToken();
         headers['authorization'] = 'Bearer ' + accessToken;

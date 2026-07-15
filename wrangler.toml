@@ -32,10 +32,16 @@ ENVIRONMENT = "production"
 # binding = "AUTH_STORE"
 # id = "your-kv-namespace-id"
 
+# Required for dashboard runtime settings and ad-shortener return links.
+# Create with: wrangler kv:namespace create "LINK_STORE"
+[[kv_namespaces]]
+binding = "LINK_STORE"
+id = "bdedf9e5f4bf46e684bea59e83bb96dd"
+
 # Preview namespace for wrangler dev
-# [[kv_namespaces]]
-# binding = "AUTH_STORE"
-# id = "your-preview-namespace-id"
+[[kv_namespaces]]
+binding = "AUTH_STORE"
+id = "bdedf9e5f4bf46e684bea59e83bb96dd"
 # preview_id = "your-preview-namespace-id"
 
 # ============================================

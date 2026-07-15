@@ -1,6 +1,188 @@
 // HTML Templates
 import { authConfig, uiConfig, megaConfig } from './config.js';
 
+function bootswatchTheme() {
+    return uiConfig.theme === 'dark' ? 'darkly' : uiConfig.theme;
+}
+
+function isStandaloneMegaFile(model = {}) {
+    return model.is_mega && model.is_file;
+}
+
+function playerScripts(model = {}) {
+    if (uiConfig.default_player !== 'jwplayer') return '';
+    return `<script src="${uiConfig.jwplayer_script}"></script>`;
+}
+
+function plyrStyles() {
+    if (uiConfig.default_player !== 'plyr') return '';
+    return `<link rel="stylesheet" href="https://cdn.plyr.io/${uiConfig.plyr_io_version}/plyr.css" />`;
+}
+
+function plyrScripts() {
+    if (uiConfig.default_player !== 'plyr') return '';
+    return `<script src="https://cdn.plyr.io/${uiConfig.plyr_io_version}/plyr.polyfilled.js"></script>`;
+}
+
+function appScript(model = {}) {
+    if (isStandaloneMegaFile(model)) return '';
+    return `<script src="${uiConfig.jsdelivr_cdn_src}@${uiConfig.version}/js/app.obf.js"></script>`;
+}
+
+function megaFileViewScript(model = {}) {
+    if (!isStandaloneMegaFile(model)) return '';
+    return `<script>
+(function () {
+  function isMegaFileView() {
+    return window.MODEL && window.MODEL.is_mega && !window.location.pathname.endsWith('/');
+  }
+
+  function readEncoded(value) {
+    var chars = String(value || '').split('').reverse().join('');
+    return chars.slice(24).slice(0, -20);
+  }
+
+  function decodePayload(value) {
+    return decodeURIComponent(atob(readEncoded(value)).split('').map(function (char) {
+      return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+  }
+
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, function (char) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char];
+    });
+  }
+
+  function formatSize(value) {
+    var size = Number(value || 0);
+    if (size >= 1073741824) return (size / 1073741824).toFixed(2) + ' GB';
+    if (size >= 1048576) return (size / 1048576).toFixed(2) + ' MB';
+    if (size >= 1024) return (size / 1024).toFixed(2) + ' KB';
+    return size ? size + ' B' : '';
+  }
+
+  function renderNativeVideo(url, mimeType) {
+    var poster = UI.poster ? ' poster="' + escapeHtml(UI.poster) + '"' : '';
+    return '<video id="vplayer" class="mega-native-player" controls playsinline preload="auto"' + poster + '>' +
+      '<source src="' + escapeHtml(url) + '" type="' + escapeHtml(mimeType || 'video/mp4') + '">' +
+      '</video>';
+  }
+
+  function render(file) {
+    var videoUrl = window.location.origin + window.location.pathname;
+    var fileName = file.name || decodeURIComponent(window.location.pathname.split('/').pop() || '');
+    var size = formatSize(file.size);
+    var canUseJw = UI.default_player === 'jwplayer' && window.jwplayer;
+    var playerMarkup = canUseJw ? '<div id="vplayer"></div>' : renderNativeVideo(videoUrl, file.mimeType);
+    var escapedUrl = escapeHtml(videoUrl);
+
+    document.body.innerHTML =
+      '<style>' +
+      'body{background:#272b30;color:#fff}' +
+      '.mega-view{padding:calc(' + escapeHtml(UI.header_padding || 70) + 'px + 18px) 12px 36px}' +
+      '.mega-shell{max-width:1120px;margin:0 auto}' +
+      '.mega-card{background:#32383e;border:1px solid rgba(255,255,255,.12);border-radius:8px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.24)}' +
+      '.mega-meta{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}' +
+      '.mega-title{font-weight:700;line-height:1.35;overflow-wrap:anywhere}' +
+      '.mega-size{margin-top:4px;color:#c8d1d9;font-size:14px}' +
+      '.mega-player{background:#000;aspect-ratio:16/9;width:100%}' +
+      '#vplayer,.jwplayer,.mega-native-player{width:100%;height:100%}' +
+      '.mega-actions{display:flex;gap:10px;flex-wrap:wrap;padding:14px 16px;background:#2b3035}' +
+      '.mega-url{padding:0 16px 16px;background:#2b3035}' +
+      '.mega-url input{background:#fff;color:#212529;border-color:#ced4da}' +
+      '</style>' +
+      '<header><div id="nav"><nav class="navbar navbar-expand-lg ' + UI.header_style_class + '">' +
+      '<div class="container-fluid"><a class="navbar-brand" href="/">Home</a></div></nav></div></header>' +
+      '<main class="mega-view"><div class="mega-shell"><div class="mega-card">' +
+      '<div class="mega-meta"><div class="mega-title">' + escapeHtml(fileName) + '</div>' +
+      (size ? '<div class="mega-size">' + escapeHtml(size) + '</div>' : '') + '</div>' +
+      '<div class="mega-player">' + playerMarkup + '</div>' +
+      '<div class="mega-actions">' +
+      '<a class="btn btn-primary" href="' + escapedUrl + '?download=1" download>Download</a>' +
+      '<a class="btn btn-secondary" href="' + escapedUrl + '" target="_blank" rel="noopener">Open direct</a>' +
+      '<button class="btn btn-info" type="button" id="copyLinkBtn">Copy link</button>' +
+      '</div><div class="mega-url"><input class="form-control" id="dlurl" type="text" value="' + escapedUrl + '" readonly></div>' +
+      '</div></div></main>';
+
+    var copyBtn = document.getElementById('copyLinkBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var input = document.getElementById('dlurl');
+        input.select();
+        document.execCommand('copy');
+        copyBtn.textContent = 'Copied';
+      });
+    }
+
+    if (canUseJw) {
+      try {
+        var playerInstance = window.jwplayer('vplayer');
+        var hlsRetried = false;
+        var showError = function () {
+          var el = document.getElementById('vplayer');
+          if (el) el.outerHTML = '<div style="padding:24px;text-align:center;color:#fff;background:#32383e;border-radius:8px;">This file cannot be played in browser. Please download it.</div>';
+        };
+        playerInstance.setup({
+          // JW defaults to metadata-only (~tens of KB). For MEGA this leaves
+          // the user waiting after pressing play, so preload a playback buffer
+          // while the player is visible.
+          playlist: [{ file: videoUrl, type: (file.mimeType || 'video/mp4').split('/').pop(), image: UI.poster || '' }],
+          preload: 'auto',
+          width: '100%',
+          aspectratio: UI.plyr_io_video_resolution || '16:9',
+          stretching: 'uniform'
+        });
+        var onPlayErr = function (e) {
+          if (hlsRetried) { showError(); return; }
+          if (e && e.code !== 224003) return;
+          hlsRetried = true;
+          try {
+            playerInstance.remove();
+            var hlsUrl = videoUrl + (videoUrl.indexOf('?') > -1 ? '&' : '?') + 'hls=1';
+            window.jwplayer('vplayer').setup({
+              playlist: [{ file: hlsUrl, type: 'hls' }],
+              // HLS has many separate requests; metadata preload avoids
+              // needlessly queueing several slow MEGA segments.
+              preload: 'metadata',
+              width: '100%',
+              aspectratio: UI.plyr_io_video_resolution || '16:9',
+              image: UI.poster || '',
+              autostart: true
+            });
+          } catch (err2) {
+            showError();
+          }
+        };
+        playerInstance.on('playbackError', onPlayErr);
+        playerInstance.on('error', onPlayErr);
+      } catch (error) {
+        document.getElementById('vplayer').outerHTML = renderNativeVideo(videoUrl, file.mimeType);
+      }
+    } else if (UI.default_player === 'plyr' && window.Plyr) {
+      new window.Plyr('#vplayer');
+    }
+  }
+
+  function load() {
+    if (!isMegaFileView()) return;
+    fetch(window.location.href, { method: 'POST' })
+      .then(function (response) { return response.text(); })
+      .then(function (text) { render(JSON.parse(decodePayload(text))); })
+      .catch(function () {
+        render({ name: decodeURIComponent(window.location.pathname.split('/').pop() || ''), mimeType: 'video/mp4' });
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(load, 0); });
+  } else {
+    setTimeout(load, 0);
+  }
+})();
+</script>`;
+}
+
 // Get all drive names including Mega
 function getAllDriveNames() {
     const googleDrives = authConfig.roots.map(it => it.name);
@@ -24,18 +206,20 @@ function html(current_drive_order = 0, model = {}) {
     window.current_drive_order = ${current_drive_order};
     window.UI = JSON.parse('${JSON.stringify(uiConfig)}');
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.plyr.io/${uiConfig.plyr_io_version}/plyr.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.0/dist/${uiConfig.theme}/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  ${isStandaloneMegaFile(model) ? '' : '<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>'}
+  ${plyrStyles()}
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.0/dist/${bootswatchTheme()}/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <style>a{color:${uiConfig.css_a_tag_color};}p{color:${uiConfig.css_p_tag_color};}</style>
-  <script src="${uiConfig.jsdelivr_cdn_src}@${uiConfig.version}/js/app.obf.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/build/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+  ${playerScripts(model)}
+  ${appScript(model)}
+  ${isStandaloneMegaFile(model) ? '' : '<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/build/pdf.min.js"></script>'}
+  ${isStandaloneMegaFile(model) ? '' : '<script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>'}
 </head>
 <body>
 </body>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
-  <script src="https://cdn.plyr.io/${uiConfig.plyr_io_version}/plyr.polyfilled.js"></script>
+  ${isStandaloneMegaFile(model) ? '' : '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>'}
+  ${plyrScripts()}
+  ${megaFileViewScript(model)}
 </html>`;
 }
 
@@ -58,8 +242,7 @@ function getHomepage() {
           window.UI = JSON.parse('${JSON.stringify(uiConfig)}');
       </script>
       <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-      <link rel="stylesheet" href="https://cdn.plyr.io/${uiConfig.plyr_io_version}/plyr.css" />
-      <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.0/dist/${uiConfig.theme}/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+      <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.0/dist/${bootswatchTheme()}/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
       <style>a{color:${uiConfig.css_a_tag_color};}p{color:${uiConfig.css_p_tag_color};}</style>
    </head>
    <body>
