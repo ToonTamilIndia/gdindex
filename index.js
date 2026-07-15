@@ -429,13 +429,13 @@ async function handleMegaRequest(request, megaDrive, path, env) {
                 const totalDur = totalDuration && totalDuration > 0 ? totalDuration : 0;
 
                 const effectiveBitrate = bitrate > 0 ? bitrate : Math.max(1, (fileSize * 8) / (totalDur > 0 ? totalDur : 60));
-                // Short segments greatly reduce startup/seeking buffer time and
-                // recover more quickly on slow MEGA connections.
-                const targetSegDur = 6;
+                // MEGA has high per-request latency. Larger HLS segments reduce
+                // the number of upstream range requests during playback.
+                const targetSegDur = 30;
                 const TS_PKT = 188;
                 const bytesPerSeg = Math.max(TS_PKT, Math.floor((effectiveBitrate * targetSegDur) / 8));
                 const numSegs = Math.max(1, Math.ceil(fileSize / bytesPerSeg));
-                const SEG_DUR = Math.max(2, Math.min(6, Math.ceil((fileSize * 8) / (effectiveBitrate * Math.max(1, numSegs)))));
+                const SEG_DUR = Math.max(8, Math.min(30, Math.ceil((fileSize * 8) / (effectiveBitrate * Math.max(1, numSegs)))));
                 let m3u8 = '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:' + SEG_DUR + '\n#EXT-X-MEDIA-SEQUENCE:0\n';
                 let elapsed = 0;
                 for (let i = 0; i < numSegs; i++) {
