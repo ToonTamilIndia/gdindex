@@ -1,72 +1,101 @@
-# 📁 GDIndex - Google Drive Index with Mega.nz Support
+<p align="center">
+  <a href="https://github.com/ToonTamilIndia/gdindex">
+    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=28&duration=2600&pause=800&color=38BDF8&center=true&vCenter=true&width=900&lines=ToonTamilIndia+GDIndex;Google+Drive+%2B+Mega.nz+Media+Index;Dashboard+Themes+%2B+Ad+Gate+%2B+JWPlayer" alt="ToonTamilIndia GDIndex typing banner" />
+  </a>
+</p>
 
-A feature-rich Google Drive & Mega.nz index running on Cloudflare Workers, featuring a permission management dashboard, rclone configuration support, and beautiful UI.
+<p align="center">
+  <img src="https://img.shields.io/badge/JavaScript-ESM-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare" />
+  <img src="https://img.shields.io/badge/Google_Drive-API-4285F4?style=for-the-badge&logo=googledrive&logoColor=white" alt="Google Drive" />
+  <img src="https://img.shields.io/badge/Mega.nz-Supported-D9272E?style=for-the-badge&logo=mega&logoColor=white" alt="Mega.nz" />
+  <img src="https://img.shields.io/badge/Bootstrap-Bootswatch-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" />
+</p>
 
-![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange.svg)
+<p align="center">
+  <img src="https://img.shields.io/github/stars/ToonTamilIndia/gdindex?style=flat-square&color=f97316" alt="Stars" />
+  <img src="https://img.shields.io/github/forks/ToonTamilIndia/gdindex?style=flat-square&color=3b82f6" alt="Forks" />
+  <img src="https://img.shields.io/github/issues/ToonTamilIndia/gdindex?style=flat-square&color=ef4444" alt="Issues" />
+  <img src="https://img.shields.io/github/last-commit/ToonTamilIndia/gdindex?style=flat-square&color=22c55e" alt="Last Commit" />
+  <img src="https://img.shields.io/github/repo-size/ToonTamilIndia/gdindex?style=flat-square&color=8b5cf6" alt="Repo Size" />
+</p>
 
-## ✨ Features
+> A Cloudflare Workers-based Google Drive and Mega.nz media index with a permission management dashboard, customizable themes, ad-gate support, and rclone config import.
 
-- 📂 **Google Drive Index** - Browse and stream files from Google Drive
-- ☁️ **Mega.nz Support** - Access Mega.nz cloud storage
-- 🔐 **Permission Dashboard** - Manage folder access permissions
-- 🔧 **Rclone Support** - Import configuration from rclone.conf
-- 🎨 **Beautiful Themes** - Multiple Bootstrap themes
-- 🔒 **Authentication** - Basic auth and Auth0 integration
-- 📱 **Responsive Design** - Works on all devices
-- 🎬 **Media Player** - Built-in video/audio player
-- 🔍 **Search** - Full-text search across drives
+## Table of Contents
 
-## 📁 File Structure
+- [Features](#features)
+- [File Structure](#file-structure)
+- [Requirements](#requirements)
+- [Deployment](#deployment)
+- [Configuration](#configuration)
+- [Authentication](#authentication)
+- [Themes](#themes)
+- [Ad Shortener Gate](#ad-shortener-gate)
+- [Dashboard](#dashboard)
+- [URL Structure](#url-structure)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
+## Features
+
+- **Google Drive Index** -- Browse and stream files from Google Drive
+- **Mega.nz Support** -- Access Mega.nz cloud storage
+- **Permission Dashboard** -- Manage folder access permissions
+- **Rclone Import** -- Import configuration from rclone.conf
+- **Multiple Themes** -- Choose from 26+ Bootswatch themes
+- **Authentication** -- Basic auth and Auth0 integration
+- **Media Player** -- Built-in Plyr or JWPlayer
+- **Search** -- Full-text search across drives
+- **Ad Gate** -- Optional GPLinks shortener flow with KV-backed return IDs
+
+## File Structure
 
 ```
-├── index.js          # Main entry point & route handler
-├── config.js         # All configuration settings
-├── utils.js          # Utility functions
-├── templates.js      # HTML templates
-├── googleDrive.js    # Google Drive API handler
-├── megaDrive.js      # Mega.nz API handler
-├── dashboard.js      # Permission management dashboard
-├── auth.js           # Authentication handlers
-├── rclone.js         # Rclone config parser
-├── wrangler.toml     # Cloudflare Wrangler config
-└── README.md         # This file
+├── index.js            Main entry point and route handler
+├── config.example.js   Configuration template (copy to config.js)
+├── config.js           Your configuration (gitignored)
+├── utils.js            Utility functions
+├── templates.js        HTML templates
+├── googleDrive.js      Google Drive API handler
+├── megaDrive.js        Mega.nz API handler
+├── adGate.js           KV-backed ad shortener gate
+├── dashboard.js        Permission management dashboard
+├── auth.js             Authentication handlers
+├── rclone.js           Rclone config parser
+├── wrangler.toml       Cloudflare Wrangler config
+└── README.md           This file
 ```
 
-## 🚀 Deployment
+## Requirements
 
+- Node.js 16+
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
+- Cloudflare account
+- Google Cloud project with Drive API enabled
+- (Optional) Mega.nz account
+- (Optional) Auth0 tenant
 
+## Deployment
 
-### Wrangler CLI (Recommended)
-
-#### Prerequisites
+### Wrangler CLI
 
 ```bash
-# Install Node.js (v16+)
-# Install Wrangler
 npm install -g wrangler
-
-# Login to Cloudflare
 wrangler login
-```
 
-#### Setup
-
-1. **Clone or download this repository**
-
-```bash
 git clone https://github.com/ToonTamilIndia/gdindex.git
 cd gdindex
+
+cp config.example.js config.js
+# Edit config.js with your credentials
+
+wrangler deploy
 ```
 
-2. **Check wrangler.toml**
-
-```bash
-cat wrangler.toml
-```
-
-3. **Configure wrangler.toml**
+### wrangler.toml
 
 ```toml
 name = "gdindex"
@@ -74,120 +103,67 @@ main = "index.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Optional: KV Namespace for Auth0
 # [[kv_namespaces]]
 # binding = "AUTH_STORE"
-# id = "your-kv-namespace-id"
+# id = "your-auth-store-id"
 
-# Optional: Custom domain
-# routes = [
-#   { pattern = "files.yourdomain.com/*", zone_name = "yourdomain.com" }
-# ]
+# [[kv_namespaces]]
+# binding = "LINK_STORE"
+# id = "your-link-store-id"
 ```
 
-4. **Deploy**
+## Configuration
+
+Copy the template and fill in your credentials:
 
 ```bash
-# Development (local)
-wrangler dev
-
-# Production
-wrangler deploy
+cp config.example.js config.js
 ```
 
-### GitHub Actions (CI/CD)
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to Cloudflare Workers
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
-      - name: Install Wrangler
-        run: npm install -g wrangler
-        
-      - name: Deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: wrangler deploy
-```
-
-Add `CLOUDFLARE_API_TOKEN` to your repository secrets.
-
-## ⚙️ Configuration
-
-### config.js
-
-Edit `config.js` to configure your drives:
+### Google Drive
 
 ```javascript
-// Google Drive Configuration
 const authConfig = {
-    "siteName": "My Drive Index",
     "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
     "client_secret": "YOUR_CLIENT_SECRET",
     "refresh_token": "YOUR_REFRESH_TOKEN",
     "roots": [
         {
             "id": "root",
-            "name": "My Drive",
-            "auth": { "user": "password" }  // Optional auth
+            "name": "My Drive"
         },
         {
             "id": "SHARED_DRIVE_ID",
-            "name": "Team Drive",
-            "protect_file_link": true
+            "name": "Team Drive"
         }
     ]
 };
+```
 
-// Mega.nz Configuration
+### Mega.nz
+
+```javascript
 const megaConfig = {
     "enabled": true,
     "accounts": [
         { "email": "your@email.com", "password": "yourpassword" }
     ],
     "roots": [
-        { "id": "folder_id", "name": "Mega Folder", "public": true }
+        {
+            "link": "https://mega.nz/folder/ID#KEY",
+            "name": "Mega Folder",
+            "public": true
+        }
     ]
-};
-
-// Dashboard Admin
-const dashboardConfig = {
-    "admin_username": "admin",
-    "admin_password": "change_this_password"
 };
 ```
 
-### Using Rclone Configuration
+### Rclone Import
 
-You can import settings from your existing rclone.conf:
+Open Dashboard at `/dashboard`, go to Import/Export, paste your rclone.conf content, and click Import.
 
-1. Open the Dashboard at `/dashboard`
-2. Go to Import/Export settings
-3. Paste your rclone.conf content
-4. Click Import
+Supported remotes: `drive` (Google Drive), `mega` (Mega.nz).
 
-**Supported rclone remote types:**
-- `drive` - Google Drive
-- `mega` - Mega.nz
-
-Example rclone.conf:
 ```ini
 [my_gdrive]
 type = drive
@@ -195,45 +171,23 @@ client_id = YOUR_CLIENT_ID
 client_secret = YOUR_CLIENT_SECRET
 token = {"access_token":"...","refresh_token":"..."}
 team_drive = SHARED_DRIVE_ID
-
-[my_mega]
-type = mega
-user = your@email.com
-pass = OBSCURED_PASSWORD
 ```
 
-## 🔗 URL Structure
-
-| Route | Description |
-|-------|-------------|
-| `/` | Homepage with drive list |
-| `/0:/` | First Google Drive root |
-| `/1:/path/to/file` | Second Google Drive, specific path |
-| `/mega0:/` | First Mega.nz root |
-| `/dashboard` | Permission management dashboard |
-| `/0:search?q=query` | Search in first drive |
-
-## 🔐 Authentication
+## Authentication
 
 ### Basic Auth (Per Folder)
-
-Add auth to any root in `config.js`:
 
 ```javascript
 {
     "id": "folder_id",
     "name": "Private Folder",
     "auth": {
-        "user1": "password1",
-        "user2": "password2"
+        "user1": "password1"
     }
 }
 ```
 
-### Auth0 Integration
-
-1. Create an Auth0 application
-2. Configure in `config.js`:
+### Auth0
 
 ```javascript
 const auth0Config = {
@@ -244,137 +198,113 @@ const auth0Config = {
     logoutUrl: "https://yoursite.com"
 };
 
-// Enable in authConfig
-const authConfig = {
-    "enable_auth0_com": true,
-    // ...
-};
+// In authConfig:
+"enable_auth0_com": true
 ```
 
-3. Create KV namespace for session storage:
+Create a KV namespace and add the binding to wrangler.toml:
 
 ```bash
 wrangler kv:namespace create AUTH_STORE
 ```
 
-4. Add to wrangler.toml:
-
-```toml
-[[kv_namespaces]]
-binding = "AUTH_STORE"
-id = "your-namespace-id"
-```
-
-## 🎨 Themes
-
-Change theme in `config.js`:
+## Themes
 
 ```javascript
 const uiConfig = {
-    "theme": "slate",  // Options: cerulean, cosmo, cyborg, darkly, 
-                       // flatly, journal, litera, lumen, lux, materia,
-                       // minty, morph, pulse, quartz, sandstone, simplex,
-                       // sketchy, slate, solar, spacelab, superhero,
-                       // united, vapor, yeti, zephyr
+    "theme": "slate", // cerulean, cosmo, cyborg, darkly, flatly, ...
+    "default_player": "plyr" // plyr or jwplayer
 };
 ```
 
-## 📊 Dashboard
+Available themes: cerulean, cosmo, cyborg, dark, darkly, flatly, journal, litera, lumen, lux, materia, minty, morph, pulse, quartz, sandstone, simplex, sketchy, slate, solar, spacelab, superhero, united, vapor, yeti, zephyr.
 
-Access the dashboard at `/dashboard` to:
+`dark` is accepted as a dashboard-friendly alias for Bootswatch `darkly`.
 
-- ✅ View all configured drives (Google Drive & Mega.nz)
-- 🔄 Toggle public/private access per folder
-- 👥 Add/remove users for private folders
-- ⚡ Quick actions (make all public/private)
-- 📥 Import rclone configuration
+## Ad Shortener Gate
 
-Default credentials: `admin` / `admin123` (change in config.js!)
+Disabled by default. When enabled, file view links are valid for 10 minutes and direct download links for 30 minutes.
 
-## 🛠️ Development
-
-### Local Development
-
-```bash
-# Install dependencies
-npm install -g wrangler
-
-# Run locally
-wrangler dev
-
-# Open http://localhost:8787
+```javascript
+const adConfig = {
+    "enabled": false,
+    "provider": "gplinks",
+    "api_token": "YOUR_GPLINKS_API_TOKEN",
+    "min_wait_seconds": 10,
+    "view_expiry_seconds": 600,
+    "download_expiry_seconds": 1800
+};
 ```
 
-### Building for Production
-
-For a single-file deployment:
+Create a KV namespace:
 
 ```bash
-# Bundle all files (requires esbuild or similar)
+wrangler kv:namespace create LINK_STORE
+```
+
+Add binding to wrangler.toml and enable from the dashboard.
+
+## Dashboard
+
+Access at `/dashboard`. Features:
+
+- View all configured drives (Google Drive and Mega.nz)
+- Toggle public/private access per folder
+- Add/remove users for private folders
+- Import rclone configuration
+- Change theme, player, and ad-gate settings
+- Browserless health check and MEGA upload management
+
+Dashboard secrets (recommended over config.js):
+
+```bash
+wrangler secret put DASHBOARD_ADMIN_USERNAME
+wrangler secret put DASHBOARD_ADMIN_PASSWORD
+wrangler secret put DASHBOARD_SESSION_SECRET
+```
+
+## URL Structure
+
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage with drive list |
+| `/0:/` | First Google Drive root |
+| `/1:/path/to/file` | Second Google Drive, specific path |
+| `/mega0:/` | First Mega.nz root |
+| `/dashboard` | Permission management dashboard |
+| `/0:search?q=query` | Search in first drive |
+
+## Development
+
+```bash
+wrangler dev
+# Opens at http://localhost:8787
+```
+
+### Single-file bundle
+
+```bash
 npx esbuild index.js --bundle --outfile=worker.js --format=esm
 ```
 
-## 📋 Environment Variables
-
-For sensitive data, use Wrangler secrets:
+### Environment secrets
 
 ```bash
-# Set secrets
 wrangler secret put GOOGLE_CLIENT_SECRET
 wrangler secret put REFRESH_TOKEN
-wrangler secret put DASHBOARD_PASSWORD
-
-# Use in code
-const secret = env.GOOGLE_CLIENT_SECRET;
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-### Common Issues
+| Issue | Solution |
+|-------|----------|
+| No access token | Check client_id, client_secret, and refresh_token |
+| Shared Drive not found | Verify the Drive ID starts with `0A` and the account has access |
+| KV namespace not found | Create the namespace and add binding to wrangler.toml |
+| CORS errors | Enable `enable_cors_file_down` in config.js |
 
-1. **"Error: No access token"**
-   - Check your `client_id`, `client_secret`, and `refresh_token`
-   - Ensure OAuth consent screen is properly configured
+Add `DEBUG = "true"` to wrangler.toml `[vars]` for verbose logging.
 
-2. **"Shared Drive not found"**
-   - Use the correct Shared Drive ID (starts with `0A`)
-   - Ensure the account has access to the Shared Drive
+## License
 
-3. **"KV namespace not found"**
-   - Create KV namespace: `wrangler kv:namespace create AUTH_STORE`
-   - Add binding to wrangler.toml
-
-4. **CORS errors**
-   - Enable CORS in config: `"enable_cors_file_down": true`
-
-### Debug Mode
-
-Add to wrangler.toml for verbose logging:
-
-```toml
-[vars]
-DEBUG = "true"
-```
-
-## 📜 License
-
-MIT License - feel free to use and modify.
-
-## 🙏 Credits
-
-- Original [Parveen Bhadoo]()
-- UI powered by [Bootstrap](https://getbootstrap.com/) & [Bootswatch](https://bootswatch.com/)
-- Video player by [Plyr](https://plyr.io/)
-
-## 🔗 Links
-
-- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
-- [Wrangler CLI Docs](https://developers.cloudflare.com/workers/wrangler/)
-- [Google Drive API](https://developers.google.com/drive/api)
-- [Mega.nz SDK](https://mega.nz/sdk)
-
----
-
-<p align="center">
-  Made with ❤️ for the community
-</p>
+MIT License. See [LICENSE](LICENSE) for details.
